@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
+import 'package:flutter_recaptcha_plugin/expeption/token_exception.dart';
 import 'package:flutter_recaptcha_plugin/flutter_recaptcha_plugin.dart';
 
 void main() {
@@ -14,31 +12,20 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
+  String _token = 'Unknown';
+  final String _testApiKey = "6LdJ_pcaAAAAALsvmFBxP_Nrn45xoVwBm2SiGN2A";
 
-  @override
-  void initState() {
-    super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
+  void getToken() async {
+    String _requestToken;
     try {
-      platformVersion = await FlutterRecaptchaPlugin.platformVersion;
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
+      _requestToken =
+          await FlutterRecaptchaPlugin.getRecaptchaToken(apiKey: _testApiKey);
+    } on TokenException catch (e) {
+      print(e);
+      _requestToken = e.exception.message;
     }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
     setState(() {
-      _platformVersion = platformVersion;
+      _token = _requestToken;
     });
   }
 
@@ -50,7 +37,19 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: Text(
+            'Token is:\n$_token',
+            textAlign: TextAlign.center,
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            getToken();
+          },
+          child: Text(
+            "Get token",
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );
